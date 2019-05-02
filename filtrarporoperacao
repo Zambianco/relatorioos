@@ -1,0 +1,51 @@
+"""
+DESCRIÇÃO: A partir do relatório da Ordem de Serviço (Gerencial\B - Serviços
+\E-Resultado da Ordem de Serviço) extraído do Certtus este script filtra as
+ordens de serviço com montagem completa.
+DATA: 02/05/2019
+AUTOR: Rodrigo Zambianco Cataroço
+"""
+from os import listdir
+
+def getservicos(text):
+    # Extrai o início e o fim de cada OS do relatório, cada início e fim e
+    # armazena em um dicionário na forma de uma tupla, onde a chave é o
+    # número da OS.
+    relacao = {}
+    for index in range(len(text)):
+        if "Ordem de Servico:" in text[index]:
+            start = index
+            numos = int(text[index][19:26])
+        elif "TOTAL DA ORDEM DE SERVICO" in text[index]:
+            end = index
+            relacao[numos] = (start, end)
+            
+    return relacao # Retorna o dicionário
+
+lista = os.listdir("OS\\") # Obtem uma lista de arquivos na pasta de OS
+
+for item in lista:
+    with open("OS\\{}".format(item)) as ficha:
+        ficha = ficha.readlines()
+        relacao = getservicos(ficha)
+
+    total = 0
+    qtd = 0
+    for numos in list(relacao.keys()):
+        start = relacao[numos][0]
+        end = relacao[numos][1]
+        for linha in range(start, end):
+            # Laço para contabilizar apenas as OS com serviços de montagem completa
+            if "MONTAGEM COMPLETA" in ficha[linha] or
+            "MONTAR COMPLETO" in ficha[linha]:
+                valor = float(ficha[end][118:130].replace(".", "")
+                              .replace(",", ".").replace("\n", "").strip())
+                total = valor + total
+                qtd += 1
+
+    print("{} - {} - R${:.2f}".format(item, qtd, total))
+
+input()
+
+
+        
